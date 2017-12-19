@@ -1,0 +1,43 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <rdfs:Class rdf:about="http://somewhere#Processor"/>
+  <rdfs:Class rdf:about="http://somewhere#System"/>
+  <rdfs:Class rdf:about="http://somewhere#Inches">
+    <rdfs:subClassOf>
+      <rdfs:Class rdf:about="http://somewhere#Display"/>
+    </rdfs:subClassOf>
+  </rdfs:Class>
+  <rdfs:Class rdf:about="http://somewhere#Producent"/>
+  <rdfs:Class rdf:about="http://somewhere#Weight"/>
+  <rdfs:Class rdf:about="http://somewhere#Gps"/>
+  <rdfs:Class rdf:about="http://somewhere#Front_Camera">
+    <rdfs:subClassOf>
+      <rdfs:Class rdf:about="http://somewhere#Camera"/>
+    </rdfs:subClassOf>
+  </rdfs:Class>
+  <rdfs:Class rdf:about="http://somewhere#Model">
+    <rdfs:subClassOf rdf:resource="http://somewhere#Producent"/>
+  </rdfs:Class>
+  <rdfs:Class rdf:about="http://somewhere#Memory"/>
+  <rdfs:Class rdf:about="http://somewhere#Type">
+    <rdfs:subClassOf rdf:resource="http://somewhere#Display"/>
+  </rdfs:Class>
+  <rdfs:Class rdf:about="http://somewhere#Resolution">
+    <rdfs:subClassOf rdf:resource="http://somewhere#Display"/>
+  </rdfs:Class>
+  <rdfs:Class rdf:about="http://somewhere#Ram">
+    <rdfs:subClassOf rdf:resource="http://somewhere#Memory"/>
+  </rdfs:Class>
+  <rdfs:Class rdf:about="http://somewhere#Back_Camera">
+    <rdfs:subClassOf rdf:resource="http://somewhere#Camera"/>
+  </rdfs:Class>
+  <rdfs:Class rdf:about="http://somewhere#Bluetooth"/>
+  <rdfs:Class rdf:about="http://somewhere#Sim"/>
+  <rdfs:Class rdf:about="http://somewhere#Phone"/>
+  <rdfs:Class rdf:about="http://somewhere#Storage">
+    <rdfs:subClassOf rdf:resource="http://somewhere#Memory"/>
+  </rdfs:Class>
+</rdf:RDF>
