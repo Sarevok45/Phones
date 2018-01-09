@@ -1,24 +1,23 @@
-
-
-import org.apache.jena.ontology.Individual;
-import org.apache.jena.ontology.OntClass;
-import org.apache.jena.ontology.OntModel;
-import org.apache.jena.ontology.OntModelSpec;
-import org.apache.jena.rdf.model.Model;
+import org.apache.jena.ontology.*;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Property;
 import org.apache.jena.util.FileManager;
-import org.apache.jena.vocabulary.VCARD;
-import org.apache.log4j.Logger;
 import org.apache.log4j.BasicConfigurator;
-
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 public class Main {
+
 
     public static String ns = "http://somewhere#";
     public static String foafNS = "http://xmlns.com/foaf/0.1#";
@@ -27,12 +26,12 @@ public class Main {
     public static String stringTypeURI = "http://www.w3.org/2001/XMLSchema#string";
 
     public static void main(String[] args) throws FileNotFoundException {
-        System.out.println("Hello World!");
+
         BasicConfigurator.configure();
-        String filename = "example5.rdf";
+        String filename = "example6.rdf";
 
         // Create an empty model
-        OntModel model = ModelFactory.createOntologyModel(OntModelSpec.RDFS_MEM);
+        OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 
         // Use the FileManager to find the input file
         InputStream in = FileManager.get().open(filename);
@@ -55,6 +54,7 @@ public class Main {
         OntClass weight = model.createClass(ns + "Weight");
         OntClass gps = model.createClass(ns + "Gps");
         OntClass bluetooth = model.createClass(ns + "Bluetooth");
+        OntClass battery = model.createClass(ns + "Battery");
 
         //Subclass
         OntClass type = model.createClass(ns+ "DisplayType");
@@ -65,6 +65,8 @@ public class Main {
         OntClass back_camera = model.createClass(ns + "Back_Camera");
         OntClass ram = model.createClass(ns + "Ram");
         OntClass storage = model.createClass(ns + "Storage");
+        OntClass LiOn = model.createClass(ns + "LiOn");
+        OntClass LiPo = model.createClass(ns + "LiPo");
 
         // Add Subclassees to Class
         model.getOntClass(ns + "Display").addSubClass(type);
@@ -75,21 +77,205 @@ public class Main {
         model.getOntClass(ns + "Camera").addSubClass(back_camera);
         model.getOntClass(ns + "Memory").addSubClass(ram);
         model.getOntClass(ns + "Memory").addSubClass(storage);
-
+        model.getOntClass(ns + "Battery").addSubClass((LiOn));
+        model.getOntClass(ns + "Battery").addSubClass((LiPo));
 
         //Property
 
-        Property hasDisplay = model.createProperty(ns + "hasDisplay");
-        Property hasProducent = model.createProperty(ns+ "hasProducent");
-        Property hasCamera = model.createProperty(ns + "hasCamera");
-        Property hasSystem = model.createProperty(ns + "hasSystem");
-        Property hasProcessor = model.createProperty((ns + "hasProcessor"));
-        Property hasMemory = model.createProperty(ns + "hasMemory");
-        Property hasSim = model.createProperty(ns + "hasSim");
-        Property hasWeight = model.createProperty(ns + "hasWeight");
-        Property hasGps = model.createProperty(ns + "hasGps");
-        Property hasbluetooth = model.createProperty(ns + "hasBluetooth");
+        // Display property
+        ObjectProperty hasDisplay = model.createObjectProperty(ns + "hasDisplay");
+        //ObjectProperty hasDisplayInches = model.createObjectProperty(ns+"hasDisplayInches");
+        //ObjectProperty hasDisplayType = model.createObjectProperty(ns + "hasDisplayType");
+        //ObjectProperty hasDisplayResolution = model.createObjectProperty(ns + "hasDisplayResolution");
+        //model.getObjectProperty(ns + "hasDisplay").addSubProperty(hasDisplayInches);
+        //model.getObjectProperty(ns + "hasDisplay").addSubProperty(hasDisplayType);
+        //model.getObjectProperty(ns + "hasDisplay").addSubProperty(hasDisplayResolution);
 
+        ObjectProperty hasProducent = model.createObjectProperty(ns+ "hasProducent");
+        ObjectProperty hasFrontCamera = model.createObjectProperty(ns + "hasFrontCamera");
+        ObjectProperty hasBackCamera = model.createObjectProperty(ns + "hasBackCamera");
+        ObjectProperty hasSystem = model.createObjectProperty(ns + "hasSystem");
+        ObjectProperty hasProcessor = model.createObjectProperty((ns + "hasProcessor"));
+        ObjectProperty hasMemory = model.createObjectProperty(ns + "hasMemory");
+        ObjectProperty hasSim = model.createObjectProperty(ns + "hasSim");
+        ObjectProperty hasWeight = model.createObjectProperty(ns + "hasWeight");
+        ObjectProperty hasGps = model.createObjectProperty(ns + "hasGps");
+        ObjectProperty hasBluetooth = model.createObjectProperty(ns + "hasBluetooth");
+
+        //Battery property
+        ObjectProperty hasBattery = model.createObjectProperty(ns + "hasBattery");
+        ObjectProperty hasLiOn= model.createObjectProperty( ns + "hasLiOn");
+        ObjectProperty hasLiPo= model.createObjectProperty(ns+ "hasLiPo");
+        model.getObjectProperty(ns+ "hasBattery").addSubProperty(hasLiOn);
+        model.getObjectProperty(ns+ "hasBattery").addSubProperty(hasLiPo);
+
+        //Datatype
+
+        DatatypeProperty BatterySize  = model.createDatatypeProperty(ns+ "BatterySize");
+        DatatypeProperty Inches  = model.createDatatypeProperty(ns+ "Inches");
+        DatatypeProperty Resolution  = model.createDatatypeProperty(ns+ "Resolution");
+        DatatypeProperty DisplayType  = model.createDatatypeProperty(ns+ "DisplayType");
+        DatatypeProperty MemorySize  = model.createDatatypeProperty(ns+ "MemorySize");
+        DatatypeProperty RAMSize  = model.createDatatypeProperty(ns+ "RAMSize");
+
+
+        Individual Ascend_P2 = model.createIndividual(ns + "Ascend_P2", phone);
+        Ascend_P2.addProperty(MemorySize, model.createTypedLiteral(200));
+
+        Individual LiOn_2000 = model.createIndividual(ns + "LiOn_2000", LiOn);
+        LiOn_2000.addProperty(BatterySize, model.createTypedLiteral(2000));
+
+        JSONParser parser = new JSONParser();
+        List<String> batteryList = new ArrayList<String>();
+        List<String> bluetoothList = new ArrayList<String>();
+        List<String> frontCameraList = new ArrayList<String>();
+        List<String> backCameraList = new ArrayList<String>();
+        List<String> displayList = new ArrayList<String>();
+        List<String> brandList = new ArrayList<String>();
+        try {
+
+            Object obj = parser.parse(new FileReader(
+                    "phpnes.json"));
+
+            JSONObject jsonObject = (JSONObject) obj;
+            Iterator<JSONObject> iterator = jsonObject.values().iterator();
+            JSONObject JSONObjectChild = new JSONObject();
+
+            while (iterator.hasNext()) {
+                JSONObjectChild = iterator.next();
+                Iterator<JSONObject> iteratorChild = JSONObjectChild.values().iterator();
+
+
+                JSONObject JSONPhone = new JSONObject();
+                while (iteratorChild.hasNext()){
+                    JSONPhone = iteratorChild.next();
+                    Individual bluetoothTemp ;
+                    Individual brandTemp ;
+                    Individual frontCameraTemp;
+                    Individual backCameraTemp;
+                    Individual batteryTemp;
+                    String name = JSONPhone.get("DeviceName").toString();
+                    Individual temp = model.createIndividual(ns + name.replace(" ", "_") , phone);
+
+                    if (JSONPhone.containsKey("bluetooth")) {
+                        if (!bluetoothList.contains(JSONPhone.get("bluetooth").toString())) {
+                            bluetoothList.add(JSONPhone.get("bluetooth").toString());
+                            bluetoothTemp = model.createIndividual(ns + JSONPhone.get("bluetooth").toString().replace(" ", "_"), bluetooth);
+                            temp.addProperty(hasBluetooth, bluetoothTemp);
+                        } else {
+
+                            temp.addProperty(hasBluetooth, model.getIndividual(ns + JSONPhone.get("bluetooth").toString().replace(" ", "_")));
+                        }
+                    }
+                    if (JSONPhone.containsKey("Brand")) {
+                        if (!brandList.contains(JSONPhone.get("Brand").toString())) {
+                            brandList.add(JSONPhone.get("Brand").toString());
+                            brandTemp = model.createIndividual(ns + JSONPhone.get("Brand").toString().replace(" ", "_"), producent);
+                            temp.addProperty(hasProducent, brandTemp);
+                        } else {
+
+                            temp.addProperty(hasProducent, model.getIndividual(ns + JSONPhone.get("Brand").toString().replace(" ", "_")));
+                        }
+                    }
+                    if (JSONPhone.containsKey("primary_")) {
+                        System.out.println( "jestem w primary");
+                        String mp="" ;
+                        Pattern pattern = Pattern.compile("([0-9]+(\\.[0-9]+)? MP).*");
+                        String tempfront = JSONPhone.get("primary_").toString();
+                        Matcher matcher = pattern.matcher(tempfront);
+
+                        if(matcher.find()){
+                            mp = matcher.group(1);
+                        }
+                        else {
+                            if(tempfront.equals("No"))
+                                mp = "No";
+                            else
+                                mp = "Yes";
+                        }
+
+                        if (!frontCameraList.contains(JSONPhone.get("primary_").toString())) {
+                            frontCameraList.add(JSONPhone.get("primary_").toString());
+                            frontCameraTemp = model.createIndividual(ns + mp.replace(".", "_").replace(" ", "") , front_camera);
+                            temp.addProperty(hasFrontCamera, frontCameraTemp);
+                        } else {
+
+                            temp.addProperty(hasFrontCamera, model.getIndividual(ns+ mp.replace(".", "_").replace(" ", "")));
+                        }
+                    }
+                    if (JSONPhone.containsKey("secondary")) {
+                        String mp="";
+                        Pattern pattern = Pattern.compile("([0-9]+(\\.[0-9]+)? MP).*");
+                        String tempback = JSONPhone.get("secondary").toString();
+                        Matcher matcher = pattern.matcher(tempback);
+
+                        if(matcher.find()){
+                            mp = matcher.group(1);
+                        }
+                        else {
+                            if(tempback.equals("No"))
+                                mp = "No";
+                            else
+                                mp = "Yes";
+                        }
+
+                        if (!backCameraList.contains(JSONPhone.get("secondary").toString())) {
+                            backCameraList.add(JSONPhone.get("secondary").toString());
+                            backCameraTemp = model.createIndividual(ns + mp.replace(".", "_").replace(" ", "") , back_camera);
+                            temp.addProperty(hasBackCamera, backCameraTemp);
+                        } else {
+
+                            temp.addProperty(hasBackCamera, model.getIndividual(ns + mp.replace(".", "_").replace(" ", "")));
+                        }
+                    }
+                    if (JSONPhone.containsKey("battery_c")){
+                        String size = "";
+                        Pattern pattern = Pattern.compile("[0-9]+");
+                        String tempBattery = JSONPhone.get("battery_c").toString();
+                        Matcher matcher = pattern.matcher(tempBattery);
+
+                        if(matcher.find()){
+                            size = matcher.group();
+                        }
+                        if(!batteryList.contains(JSONPhone.get("battery_c").toString())) {
+                            batteryList.add(JSONPhone.get("battery_c").toString());
+
+
+
+                            if(tempBattery.contains("Li-Po")){
+                                batteryTemp = model.createIndividual(ns + "LiPo_" + size , LiPo);
+                                temp.addProperty(hasLiPo, batteryTemp);
+                            }
+                            if(tempBattery.contains("Li-Ion")){
+                                batteryTemp = model.createIndividual(ns + "LiOn_" + size , LiOn);
+                                temp.addProperty(hasLiOn, batteryTemp);
+                            }
+
+                        }
+                        else{
+                            if(JSONPhone.get("battery_c").toString().contains("Li-Po")){
+                                temp.addProperty(hasLiPo, model.getIndividual(ns + "LiPo_"+size));
+                            }
+                            if(JSONPhone.get("battery_c").toString().contains("Li-Ion")){
+                                temp.addProperty(hasLiOn, model.getIndividual(ns + "LiOn_"+size));
+                            }
+                        }
+
+                    }
+
+                    System.out.println(name);
+                }
+                //DO what ever you whont with jsonChildObject
+
+
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Ascend_P2.addProperty(hasBattery, LiOn_2000);
 
         FileOutputStream out = new FileOutputStream(filename);
         model.write(out);
