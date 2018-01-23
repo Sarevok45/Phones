@@ -84,12 +84,12 @@ public class Main {
 
         // Display property
         ObjectProperty hasDisplay = model.createObjectProperty(ns + "hasDisplay");
-        //ObjectProperty hasDisplayInches = model.createObjectProperty(ns+"hasDisplayInches");
-        //ObjectProperty hasDisplayType = model.createObjectProperty(ns + "hasDisplayType");
-        //ObjectProperty hasDisplayResolution = model.createObjectProperty(ns + "hasDisplayResolution");
-        //model.getObjectProperty(ns + "hasDisplay").addSubProperty(hasDisplayInches);
-        //model.getObjectProperty(ns + "hasDisplay").addSubProperty(hasDisplayType);
-        //model.getObjectProperty(ns + "hasDisplay").addSubProperty(hasDisplayResolution);
+        ObjectProperty hasDisplayInches = model.createObjectProperty(ns+"hasDisplayInches");
+        ObjectProperty hasDisplayType = model.createObjectProperty(ns + "hasDisplayType");
+        ObjectProperty hasDisplayResolution = model.createObjectProperty(ns + "hasDisplayResolution");
+        model.getObjectProperty(ns + "hasDisplay").addSubProperty(hasDisplayInches);
+        model.getObjectProperty(ns + "hasDisplay").addSubProperty(hasDisplayType);
+        model.getObjectProperty(ns + "hasDisplay").addSubProperty(hasDisplayResolution);
 
         ObjectProperty hasProducent = model.createObjectProperty(ns+ "hasProducent");
         ObjectProperty hasFrontCamera = model.createObjectProperty(ns + "hasFrontCamera");
@@ -132,6 +132,8 @@ public class Main {
         List<String> backCameraList = new ArrayList<String>();
         List<String> displayList = new ArrayList<String>();
         List<String> brandList = new ArrayList<String>();
+        List<String> processorList = new ArrayList<String>();
+        List<String> sizeList = new ArrayList<String>();
         try {
 
             Object obj = parser.parse(new FileReader(
@@ -154,6 +156,9 @@ public class Main {
                     Individual frontCameraTemp;
                     Individual backCameraTemp;
                     Individual batteryTemp;
+                    Individual processorTemp;
+                    Individual sizeTemp;
+
                     String name = JSONPhone.get("DeviceName").toString();
                     Individual temp = model.createIndividual(ns + name.replace(" ", "_") , phone);
 
@@ -259,6 +264,39 @@ public class Main {
                             if(JSONPhone.get("battery_c").toString().contains("Li-Ion")){
                                 temp.addProperty(hasLiOn, model.getIndividual(ns + "LiOn_"+size));
                             }
+                        }
+
+
+                    }
+                    if (JSONPhone.containsKey("chipset")){
+                        String chipsetType = "";
+
+                        chipsetType = JSONPhone.get("chipset").toString();
+
+                        if(!processorList.contains(chipsetType)){
+                            processorList.add(chipsetType);
+                            processorTemp = model.createIndividual(ns + chipsetType.replace(" ", "_"), processor);
+                            temp.addProperty(hasProcessor, model.getIndividual(ns + chipsetType.replace(" ", "_")) );
+                        }
+                        else {
+                            temp.addProperty(hasProcessor, model.getIndividual(ns + chipsetType.replace(" ", "_")) );
+                        }
+
+                    }
+                    if (JSONPhone.containsKey("size")){
+                        String sizeInches = "";
+
+                        sizeInches = JSONPhone.get("size").toString();
+
+                        String[] splited = sizeInches.split("\\s+");
+
+                        if(!sizeList.contains(sizeInches)){
+                            sizeList.add(sizeInches);
+                            sizeTemp = model.createIndividual(ns + splited[0].replace(" ", "_"), inches);
+                            temp.addProperty(hasDisplayInches, model.getIndividual(ns + splited[0].replace(" ", "_")) );
+                        }
+                        else {
+                            temp.addProperty(hasDisplayInches, model.getIndividual(ns + splited[0].replace(" ", "_")) );
                         }
 
                     }
